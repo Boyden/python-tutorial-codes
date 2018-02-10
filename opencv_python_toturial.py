@@ -542,3 +542,174 @@ ret, otsu = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 print(thresh,ret)
 
 #Geometric Transformations of Images
+
+#Scaling
+import cv2
+import numpy as np
+
+img = cv2.imread('messi5.jpg')
+res = cv2.resize(img,None,fx=2, fy=2, interpolation = cv2.INTER_CUBIC)
+
+#OR
+
+height, width = img.shape[:2]
+res = cv2.resize(img,(2*width, 2*height), interpolation = cv2.INTER_CUBIC)
+
+#Translation
+import cv2
+import numpy as np
+
+img = cv2.imread('messi5.jpg',0)
+rows,cols = img.shape
+
+M = np.float32([[1,0,100],[0,1,50]])
+dst = cv2.warpAffine(img,M,(cols,rows))
+
+cv2.imshow('img',dst)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+#Warning: Third argument of the cv2.warpAffine() function is the size of the output image, which should be in
+#the form of (width, height). Remember width = number of columns, and height = number of rows.
+
+#Rotation
+img = cv2.imread('messi5.jpg',0)
+rows,cols = img.shape
+
+M = cv2.getRotationMatrix2D((cols/2,rows/2),90,1)
+dst = cv2.warpAffine(img,M,(cols,rows))
+
+cv2.imshow('img',dst)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+#Affine Transformation
+
+#In affine transformation, all parallel lines in the original image will still be parallel in the output image. To find the
+#transformation matrix, we need three points from input image and their corresponding locations in output image. Then
+#cv2.getAffineTransform will create a 2x3 matrix which is to be passed to cv2.warpAffine.
+
+img = cv2.imread('drawing.png')
+rows,cols,ch = img.shape
+
+pts1 = np.float32([[50,50],[200,50],[50,200]])
+pts2 = np.float32([[10,100],[200,50],[100,250]])
+
+M = cv2.getAffineTransform(pts1,pts2)
+
+dst = cv2.warpAffine(img,M,(cols,rows))
+
+plt.subplot(121),plt.imshow(img),plt.title('Input')
+plt.subplot(122),plt.imshow(dst),plt.title('Output')
+
+plt.show()
+
+#Perspective Transformation
+
+#For perspective transformation, you need a 3x3 transformation matrix. Straight lines will remain straight even after
+#the transformation. To find this transformation matrix, you need 4 points on the input image and corresponding points
+#on the output image. Among these 4 points, 3 of them should not be collinear. Then transformation matrix can be
+#found by the function cv2.getPerspectiveTransform. Then apply cv2.warpPerspective with this 3x3 transformation
+#matrix.
+
+img = cv2.imread('sudokusmall.png')
+rows,cols,ch = img.shape
+
+pts1 = np.float32([[56,65],[368,52],[28,387],[389,390]])
+pts2 = np.float32([[0,0],[300,0],[0,300],[300,300]])
+
+M = cv2.getPerspectiveTransform(pts1,pts2)
+
+dst = cv2.warpPerspective(img,M,(300,300))
+
+plt.subplot(121),plt.imshow(img),plt.title('Input')
+plt.subplot(122),plt.imshow(dst),plt.title('Output')
+plt.show()
+
+#Smoothing Images
+
+#2D Convolution ( Image Filtering )
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
+img = cv2.imread('opencv_logo.png')
+
+kernel = np.ones((5,5),np.float32)/25
+dst = cv2.filter2D(img,-1,kernel)
+
+plt.subplot(121),plt.imshow(img),plt.title('Original')
+plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(dst),plt.title('Averaging')
+plt.xticks([]), plt.yticks([])
+plt.show()
+
+#Image Blurring (Image Smoothing)
+#1. Averaging
+import cv2
+import numpy as np
+from matplotlib import pyplot as plt
+
+img = cv2.imread('opencv_logo.png')
+
+blur = cv2.blur(img,(5,5))
+
+plt.subplot(121),plt.imshow(img),plt.title('Original')
+plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(blur),plt.title('Blurred')
+plt.xticks([]), plt.yticks([])
+plt.show()
+
+#2. Gaussian Filtering
+blur = cv2.GaussianBlur(img,(5,5),0)
+
+plt.subplot(121),plt.imshow(img),plt.title('Original')
+plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(blur),plt.title('Blurred')
+plt.xticks([]), plt.yticks([])
+plt.show()
+
+#3. Median Filtering
+def SaltAndPepper(src,percetage):
+
+    NoiseImg=np.copy(src)
+    NoiseNum=int(percetage*src.shape[0]*src.shape[1])
+    
+    if len(src.shape) == 2:
+    
+        for i in range(NoiseNum):
+            randX=random.randint(0,src.shape[0])
+            randY=random.randint(0,src.shape[1])
+            if random.randint(0,2)==0:
+                NoiseImg[randX,randY]=0
+            else:
+                NoiseImg[randX,randY]=255   
+
+        return NoiseImg 
+    else:
+        b, g, r = cv2.split(src)
+        b, g, r = SaltAndPepper(b,percetage), SaltAndPepper(g,percetage), SaltAndPepper(r,percetage)
+        NoiseImg = cv2.merge([b, g, r])
+        return NoiseImg
+
+noiseImg = SaltAndPepper(img, 0.1)
+median = cv2.medianBlur(noiseImg,5)
+
+plt.subplot(121),plt.imshow(noiseImg),plt.title('Original')
+plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(median),plt.title('Blurred')
+plt.xticks([]), plt.yticks([])
+plt.show()
+        
+#4. Bilateral Filtering
+
+blur = cv2.bilateralFilter(img,9,75,75)
+
+plt.subplot(121),plt.imshow(blur),plt.title('Original')
+plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(median),plt.title('Blurred')
+plt.xticks([]), plt.yticks([])
+plt.show()
+
+#Morphological Transformations
+
+#1. Erosion
