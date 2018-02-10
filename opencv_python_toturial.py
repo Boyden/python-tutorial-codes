@@ -713,3 +713,55 @@ plt.show()
 #Morphological Transformations
 
 #1. Erosion
+import cv2
+import numpy as np
+
+img = cv2.imread('j.png',0)
+kernel = np.ones((5,5),np.uint8)
+erosion = cv2.erode(img,kernel,iterations = 1)
+
+plt.subplot(121),plt.imshow(img),plt.title('Original')
+plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(erosion),plt.title('Eroded')
+plt.xticks([]), plt.yticks([])
+plt.show()
+
+#2. Dilation
+
+dilation = cv2.dilate(img,kernel,iterations = 1)
+
+plt.subplot(121),plt.imshow(img),plt.title('Original')
+plt.xticks([]), plt.yticks([])
+plt.subplot(122),plt.imshow(dilation),plt.title('Dilated')
+plt.xticks([]), plt.yticks([])
+plt.show()
+
+#3. Opening
+opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
+
+#4. Closing
+closing = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+
+#5. Morphological Gradient
+gradient = cv2.morphologyEx(img, cv2.MORPH_GRADIENT, kernel)
+
+#6. Top Hat
+tophat = cv2.morphologyEx(img, cv2.MORPH_TOPHAT, kernel)
+
+#7. Black Hat
+blackhat = cv2.morphologyEx(img, cv2.MORPH_BLACKHAT, kernel)
+
+#Opening operation:
+#    dst = open(src; element) = dilate(erode(src; element))
+#Closing operation:
+#    dst = close(src; element) = erode(dilate(src; element))
+#Morphological gradient:
+#    dst = morph_grad(src; element) = dilate(src; element) - erode(src; element)
+#“Top hat”:
+#    dst = tophat(src; element) = src - open(src; element)
+#“Black hat”:
+#    dst = blackhat(src; element) = close(src; element) - src
+#“Hit and Miss”: Only supported for CV_8UC1 binary images. Tutorial can be found in this page:
+#https://web.archive.org/web/20160316070407/http://opencv-code.com/tutorials/hit-or-miss-transform-in-opencv/
+
+#Structuring Element
