@@ -892,7 +892,7 @@ for i in range(5,0,-1):
 LS = []
 for la,lb in zip(lpA,lpB):
     rows,cols,dpt = la.shape
-    ls = np.hstack((la[:,0:cols/2], lb[:,cols/2:]))
+    ls = np.hstack((la[:, 0:int(cols/2)], lb[:, int(cols/2):]))
     LS.append(ls)
 
 # now reconstruct
@@ -902,7 +902,7 @@ for i in range(1,6):
     ls_ = cv2.add(ls_, LS[i])
 
 # image with direct connecting each half
-real = np.hstack((A[:,:cols/2],B[:,cols/2:]))
+real = np.hstack((A[:,:int(cols/2)],B[:,int(cols/2):]))
 
 cv2.imwrite('Pyramid_blending2.jpg',ls_)
 cv2.imwrite('Direct_blending.jpg',real)
