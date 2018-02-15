@@ -906,3 +906,39 @@ real = np.hstack((A[:,:int(cols/2)],B[:,int(cols/2):]))
 
 cv2.imwrite('Pyramid_blending2.jpg',ls_)
 cv2.imwrite('Direct_blending.jpg',real)
+
+
+#Contours in OpenCV
+import numpy as np
+import cv2
+imgray = cv2.imread('test.jpg')
+ret,thresh = cv2.threshold(imgray,127,255,0)
+image, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+
+img = cv2.drawContours(img, contours, -1, (0,255,0), 3)
+
+cnt = contours[4]
+img = cv2.drawContours(img, [cnt], 0, (0,255,0), 3)
+
+#1. Moments
+import cv2
+import numpy as np
+
+img = cv2.imread('star.jpg',0)
+ret,thresh = cv2.threshold(img,127,255,0)
+im, contours, hierarchy = cv2.findContours(thresh, 1, 2)
+
+cnt = contours[0]
+M = cv2.moments(cnt)
+print(M)
+
+cx = int(M['m10']/M['m00'])
+cy = int(M['m01']/M['m00'])
+
+#2. Contour Area
+area = cv2.contourArea(cnt)
+
+#3. Contour Perimeter
+perimeter = cv2.arcLength(cnt,True)
+
+#4. Contour Approximation
