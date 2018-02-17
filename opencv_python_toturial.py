@@ -942,3 +942,133 @@ area = cv2.contourArea(cnt)
 perimeter = cv2.arcLength(cnt,True)
 
 #4. Contour Approximation
+#Douglas-Peucker algorithm
+epsilon = 0.1*cv2.arcLength(cnt,True)
+approx = cv2.approxPolyDP(cnt,epsilon,True)
+
+#5. Convex Hull
+hull = cv2.convexHull(cnt)
+
+#6. Checking Convexity
+k = cv2.isContourConvex(cnt)
+
+#7. Bounding Rectangle
+#7.a. Straight Bounding Rectangle
+x,y,w,h = cv2.boundingRect(cnt)
+img = cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
+
+#7.b. Rotated Rectangle
+rect = cv2.minAreaRect(cnt)
+box = cv2.boxPoints(rect)
+box = np.int0(box)
+im = cv2.drawContours(im,[box],0,(0,0,255),2)
+
+#8. Minimum Enclosing Circle
+(x,y),radius = cv2.minEnclosingCircle(cnt)
+center = (int(x),int(y))
+radius = int(radius)
+img = cv2.circle(img,center,radius,(0,255,0),2)
+
+#9. Fitting an Ellipse
+ellipse = cv2.fitEllipse(cnt)
+im = cv2.ellipse(im,ellipse,(0,255,0),2)
+
+#10. Fitting a Line
+rows,cols = img.shape[:2]
+[vx,vy,x,y] = cv2.fitLine(cnt, cv2.DIST_L2,0,0.01,0.01)
+lefty = int((-x*vy/vx) + y)
+righty = int(((cols-x)*vy/vx)+y)
+img = cv2.line(img,(cols-1,righty),(0,lefty),(0,255,0),2)
+
+#Contour Properties
+#1. Aspect Ratio
+x,y,w,h = cv2.boundingRect(cnt)
+aspect_ratio = float(w)/h
+
+#2. Extent
+area = cv2.contourArea(cnt)
+x,y,w,h = cv2.boundingRect(cnt)
+rect_area = w*h
+extent = float(area)/rect_area
+
+#3. Solidity
+area = cv2.contourArea(cnt)
+hull = cv2.convexHull(cnt)
+hull_area = cv2.contourArea(hull)
+solidity = float(area)/hull_area
+
+#4. Equivalent Diameter
+area = cv2.contourArea(cnt)
+equi_diameter = np.sqrt(4*area/np.pi)
+
+#5. Orientation
+(x,y),(MA,ma),angle = cv2.fitEllipse(cnt)
+
+#6. Mask and Pixel Points
+mask = np.zeros(imgray.shape,np.uint8)
+cv2.drawContours(mask,[cnt],0,255,-1)
+pixelpoints = np.transpose(np.nonzero(mask))
+#pixelpoints = cv2.findNonZero(mask)
+
+#7. Maximum Value, Minimum Value and their locations
+min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(imgray,mask = mask)
+
+#8. Mean Color or Mean Intensity
+mean_val = cv2.mean(im,mask = mask)
+
+#9. Extreme Points
+leftmost = tuple(cnt[cnt[:,:,0].argmin()][0])
+rightmost = tuple(cnt[cnt[:,:,0].argmax()][0])
+topmost = tuple(cnt[cnt[:,:,1].argmin()][0])
+bottommost = tuple(cnt[cnt[:,:,1].argmax()][0])
+
+#Contours : More Functions
+#1. Convexity Defects
+hull = cv2.convexHull(cnt,returnPoints = False)
+defects = cv2.convexityDefects(cnt,hull)
+
+import cv2
+import numpy as np
+
+img = cv2.imread('star.jpg')
+img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+ret, thresh = cv2.threshold(img_gray, 127, 255,0)
+_,contours,hierarchy = cv2.findContours(thresh,2,1)
+
+cnt = contours[0]
+hull = cv2.convexHull(cnt,returnPoints = False)
+defects = cv2.convexityDefects(cnt,hull)
+
+for i in range(defects.shape[0]):
+    s,e,f,d = defects[i,0]
+    start = tuple(cnt[s][0])
+    end = tuple(cnt[e][0])
+    far = tuple(cnt[f][0])
+    cv2.line(img,start,end,[0,255,0],2)
+    cv2.circle(img,far,5,[0,0,255],-1)
+
+cv2.imshow('img',img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+#2. Point Polygon Test
+dist = cv2.pointPolygonTest(cnt,(50,50),True)
+
+#3. Match Shapes
+import cv2
+import numpy as np
+
+img1 = cv2.imread('star.jpg',0)
+img2 = cv2.imread('star2.jpg',0)
+
+ret, thresh = cv2.threshold(img1, 127, 255,0)
+ret, thresh2 = cv2.threshold(img2, 127, 255,0)
+
+_,contours,hierarchy = cv2.findContours(thresh,2,1)
+cnt1 = contours[0]
+
+_,contours,hierarchy = cv2.findContours(thresh2,2,1)
+cnt2 = contours[0]
+
+ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
+print(ret)
