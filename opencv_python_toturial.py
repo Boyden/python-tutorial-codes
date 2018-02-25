@@ -1072,3 +1072,5 @@ cnt2 = contours[0]
 
 ret = cv2.matchShapes(cnt1,cnt2,1,0.0)
 print(ret)
+
+#Contours Hierarchy
